@@ -5,17 +5,17 @@
       <span>user</span>
     </div>
     <div :class="'pipeline-' + item.type" v-for="(item,idx) in bullets" :key="idx" :style="{'left': `${item.left}px`, 'top': `${item.top}px`}"></div>
-    <div class="user ac fc jc" style="left: 50vw;background:red">
+    <div class="user ac fc jc" :style="{ left: enemyPosition.left + 'px', top: enemyPosition.top + 'px',background: 'red' }">
       <span>{{foreHp}}</span></div>
   </div>
 </template>
 
 <script>
 const keyCodeType = {
-  38: 'top',
-  40: 'down',
-  37: 'left',
-  39: 'right',
+  87: 'top',
+  83: 'down',
+  65: 'left',
+  68: 'right',
   32: 'space'
 }
 export default {
@@ -23,8 +23,13 @@ export default {
     return {
       left: 20,
       top: 20,
+      enemyPosition: {
+        left: 90,
+        top: 20
+      },
       // 一次移动的px
       disdance: 1,
+      // 炮弹
       bullets: [],
       driveDirection: [],
       keyCodeType,
@@ -34,7 +39,8 @@ export default {
       frequency: 0,
       foreHp: 9,
       // 管道方向
-      pipelineDirection: 'right'
+      pipelineDirection: 'right',
+      timerTimer: 20
     }
   },
   mounted (){
@@ -51,7 +57,7 @@ export default {
     userfrequency () {
       return true || this.frequency === 0
     },
-    // 子弹发射频率
+    // 炮弹发射频率
     bulletsFrequency () {
       return this.frequency % 25 === 0 || this.frequency === 0
     }
@@ -77,6 +83,21 @@ export default {
         this[direction] -= value
       }
     },
+    // 炮弹攻击敌人 item为炮弹
+    /**
+     * @description: 
+     * @param { left, top , type} item
+     * @return Boolean
+     */    
+    bulletLost ({ left, top }) {
+      const e = this.enemyPosition
+      const leftV = e.left - left
+      const topV = e.top - top
+      if (leftV < 5 && leftV > -40 && topV < 5 && topV > -45) {
+        return true
+      }
+      return false
+    },
     attack (type) {
       if (type === 'space') {
         // 开启攻击
@@ -92,8 +113,6 @@ export default {
             const pd = this.pipelineDirection
             const { left, top } = this
             let params = {
-              // left: this.left + 50,
-              // top: this.top + 20 -5 + 2,
               type: pd
             }
             if (pd === 'right') {
@@ -111,16 +130,17 @@ export default {
             }
             this.bullets.push(params)
           }
-          // 子弹移动
+          // 炮弹移动
           this.bullets.forEach((item, idx) => {
             const symbol = (item.type === 'down' || item.type === 'right') ? '+' : '-'
             const direction = (item.type === 'left' || item.type === 'right') ? 'left' : 'top'
-            // 子弹 移动
+            // 炮弹 移动
             item[direction] += +`${symbol}1`
-            // console.log(+`${symbol}1`, '+`${symbol}1`');
             // item.left += 1 
+            const flag = this.bulletLost(item)
+            if (flag) this.foreHp -= 1
             this.$set(this.bullets, idx, item)
-            if (item.left >= this.width - 40 || item.left < 20 || item.top >= this.height || item.top < 0) {
+            if (item.left >= this.width - 40 || item.left < 20 || item.top >= this.height || item.top < 0 || flag) {
               this.$set(this.bullets, idx, null)
             }
           })
@@ -130,16 +150,16 @@ export default {
               this.move(item)
             })
           }
-          // 过滤掉 离开页面的子弹
+          // 过滤掉 离开页面的炮弹
           this.bullets = this.bullets.filter(item => item)
-          // user不移动 没有子弹去掉timer
+          // user不移动 没有炮弹去掉timer
           if (!this.bullets.length && !this.driveDirection.length) {
             clearInterval(this.timer)
             this.timer = null
             // this.frequency = 0
           }
           this.frequency += 1
-        }, 2)
+        }, this.timerTimer)
       }
     },
     keyDown (e) {
@@ -151,7 +171,6 @@ export default {
     },
     keyUp (e) {
       const keyCode = this.keyCodeType[e.keyCode]
-      console.log(keyCode, 'up');
       if (keyCode) {
         if (keyCode !== 'space') {
           this.driveDirection = this.driveDirection.filter(item => item !== keyCode)
