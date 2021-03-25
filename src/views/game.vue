@@ -1,34 +1,49 @@
 <template>
-  <div class="content" >
-    <div class="user ac fc jc" :style="{'left': `${left}px`, 'top': `${top}px`}">
-      <div :class="'pipeline-' + pipelineDirection"></div>
-      <span>user</span>
+  <div class="fr jsd">
+    <div class="content" >
+      <div class="user ac fc jc" :style="{'left': `${left}px`, 'top': `${top}px`}">
+        <div :class="'pipeline-' + pipelineDirection"></div>
+        <span>user</span>
+      </div>
+      <div :class="'pipeline-' + item.type" v-for="(item,idx) in bullets" :key="idx" :style="{'left': `${item.left}px`, 'top': `${item.top}px`}"></div>
+      <div class="user ac fc jc" :style="{ left: controls.enemyX + 'px', top: controls.enemyY + 'px',background: 'red' }">
+        <span>{{controls.foreHp}}</span>
+      </div>
     </div>
-    <div :class="'pipeline-' + item.type" v-for="(item,idx) in bullets" :key="idx" :style="{'left': `${item.left}px`, 'top': `${item.top}px`}"></div>
-    <div class="user ac fc jc" :style="{ left: enemyPosition.left + 'px', top: enemyPosition.top + 'px',background: 'red' }">
-      <span>{{foreHp}}</span></div>
+    <div class="control" :style="{width: controls.controlWidth + 'px'}">
+      <h3>控制中心</h3>
+      <div v-for="item in controlList" :key="item.value" >
+        {{item.label}}
+        <div :class="item.value2 && 'fsd jc input-2'">
+          <input type="number" v-model="controls[item.value]">
+          <input v-if="item.value2" type="number" v-model="controls[item.value2]">
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-const keyCodeType = {
-  87: 'top',
-  83: 'down',
-  65: 'left',
-  68: 'right',
-  32: 'space'
-}
+import { keyCodeType, controlList } from '../assets/config/data'
 export default {
   data () {
     return {
+      controlList,
+      controls: {
+        // 值越小 发射频率越快
+        bulletsFrequencyVlaue: 25,
+        // 敌人血量
+        foreHp: 9,
+        // 敌人位置
+        enemyX: 90,
+        enemyY: 20,
+        // 一次移动的px
+        disdance: 1,
+        // 控制中心宽度
+        controlWidth: 200
+      },
       left: 20,
       top: 20,
-      enemyPosition: {
-        left: 90,
-        top: 20
-      },
-      // 一次移动的px
-      disdance: 1,
       // 炮弹
       bullets: [],
       driveDirection: [],
@@ -37,10 +52,11 @@ export default {
       isAttack: false,
       // timer循环次数 用来设置速度
       frequency: 0,
-      foreHp: 9,
       // 管道方向
       pipelineDirection: 'right',
+      // 一次循环时间
       timerTimer: 20
+
     }
   },
   mounted (){
@@ -49,7 +65,7 @@ export default {
   },
   computed: {
     width () {
-      return document.body.clientWidth
+      return document.body.clientWidth - this.controlWidth.controlWidth
     },
     height () {
       return document.body.clientHeight
@@ -59,7 +75,7 @@ export default {
     },
     // 炮弹发射频率
     bulletsFrequency () {
-      return this.frequency % 25 === 0 || this.frequency === 0
+      return this.frequency % this.controls.bulletsFrequencyVlaue === 0 || this.frequency === 0
     }
   },
   methods: {
@@ -74,7 +90,7 @@ export default {
       let direction = (type === 'left' || type === 'right') ? 'left' : 'top'
       // 屏幕的宽高
       const { width, height } = this // 40px user的宽高
-      const value = +`${symbol}${this.disdance}`
+      const value = +`${symbol}${this.controls.disdance}`
       this[direction] += value
       if (direction === 'left' && (this[direction] > width - 80  || this[direction] < 20)) {
         this[direction] -= value
@@ -90,9 +106,9 @@ export default {
      * @return Boolean
      */    
     bulletLost ({ left, top }) {
-      const e = this.enemyPosition
-      const leftV = e.left - left
-      const topV = e.top - top
+      const { enemyX, enemyY } = this.controls
+      const leftV = enemyX - left
+      const topV = enemyY - top
       if (leftV < 5 && leftV > -40 && topV < 5 && topV > -45) {
         return true
       }
@@ -115,14 +131,15 @@ export default {
             let params = {
               type: pd
             }
+            // 炮弹的初始位置
             if (pd === 'right') {
               params.left = left + 50
               params.top = top + 20 -5 + 2
             } else if (pd === 'left') {
-              params.left = left - 10
+              params.left = left - 20
               params.top = top + 20 -5 + 2
             } else if (pd === 'top') {
-              params.top = top - 10
+              params.top = top - 20
               params.left = left + 20 -5 + 2
             } else {
               params.top = top + 50
@@ -138,7 +155,7 @@ export default {
             item[direction] += +`${symbol}1`
             // item.left += 1 
             const flag = this.bulletLost(item)
-            if (flag) this.foreHp -= 1
+            if (flag) this.controls.foreHp -= 1
             this.$set(this.bullets, idx, item)
             if (item.left >= this.width - 40 || item.left < 20 || item.top >= this.height || item.top < 0 || flag) {
               this.$set(this.bullets, idx, null)
@@ -230,5 +247,24 @@ export default {
 .pipeline-down {
   .bullet-vertical();
   top: 40px;
+}
+.control {
+  // width: 200px;
+  background: #7d8c8e;
+  text-align: center;
+  >div {
+    margin-bottom: 20px;
+    >div {
+      &.input-2 {
+        input {
+          width: 37%;
+        }
+      }
+    }
+    input {
+      width: 80%;
+      text-align: center;
+    }
+  }
 }
 </style>
