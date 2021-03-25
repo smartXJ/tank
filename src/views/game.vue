@@ -1,22 +1,24 @@
 <template>
   <div class="fr jsd">
     <div class="content" >
+      <a class="control-show" @click="isShowControl = true" v-show="!isShowControl">口</a>
       <div class="user ac fc jc" :style="{'left': `${left}px`, 'top': `${top}px`}">
         <div :class="'pipeline-' + pipelineDirection"></div>
         <span>user</span>
       </div>
       <div :class="'pipeline-' + item.type" v-for="(item,idx) in bullets" :key="idx" :style="{'left': `${item.left}px`, 'top': `${item.top}px`}"></div>
-      <div class="user ac fc jc" :style="{ left: controls.enemyX + 'px', top: controls.enemyY + 'px',background: 'red' }">
-        <span>{{controls.foreHp}}</span>
+      <div class="user ac fc jc" :style="{ left: controls.enemyX + 'px', top: controls.enemyY + 'px',background: 'red' }" v-show="isenemyBeing">
+        <span>{{controls.enemyHp}}</span>
       </div>
     </div>
-    <div class="control" :style="{width: controls.controlWidth + 'px'}">
+    <div class="control" :style="{width: controls.controlWidth + 'px'}" v-show="isShowControl">
+      <a class="control-show" @click="isShowControl = false">--</a>
       <h3>控制中心</h3>
       <div v-for="item in controlList" :key="item.value" >
         {{item.label}}
         <div :class="item.value2 && 'fsd jc input-2'">
-          <input type="number" v-model="controls[item.value]">
-          <input v-if="item.value2" type="number" v-model="controls[item.value2]">
+          <input type="number" v-model="controls[item.value]" @change="change(item.value)">
+          <input v-if="item.value2" type="number" v-model="controls[item.value2]" @change="change(item.value2)">
         </div>
       </div>
     </div>
@@ -33,14 +35,18 @@ export default {
         // 值越小 发射频率越快
         bulletsFrequencyVlaue: 25,
         // 敌人血量
-        foreHp: 9,
+        enemyHp: 9,
         // 敌人位置
         enemyX: 90,
         enemyY: 20,
-        // 一次移动的px
+        // user一次移动的px
         disdance: 1,
+        // 炮弹一次移动的px
+        bulletDisdance: 1,
         // 控制中心宽度
-        controlWidth: 200
+        controlWidth: 200,
+        // 复活时间 s
+        rebirthTime: 3
       },
       left: 20,
       top: 20,
@@ -55,8 +61,11 @@ export default {
       // 管道方向
       pipelineDirection: 'right',
       // 一次循环时间
-      timerTimer: 20
-
+      timerTimer: 20,
+      // 敌人是否存活
+      isenemyBeing: true,
+      // 是否展示控制中心
+      isShowControl: true
     }
   },
   mounted (){
@@ -65,7 +74,8 @@ export default {
   },
   computed: {
     width () {
-      return document.body.clientWidth - this.controlWidth.controlWidth
+      if (!this.isShowControl) return document.body.clientWidth
+      return document.body.clientWidth - this.controls.controlWidth
     },
     height () {
       return document.body.clientHeight
@@ -79,6 +89,12 @@ export default {
     }
   },
   methods: {
+    // input 发生改变
+    change (type) {
+      if (this.controls[type] < 1) {
+        this.controls[type] = 1
+      }
+    },
     /**
      * @description: 
      * @param {'top','down','left','right'} type 
@@ -109,10 +125,36 @@ export default {
       const { enemyX, enemyY } = this.controls
       const leftV = enemyX - left
       const topV = enemyY - top
+      // 是否击中敌人
       if (leftV < 5 && leftV > -40 && topV < 5 && topV > -45) {
         return true
       }
       return false
+    },
+    // 炮弹击中敌人
+    hitEnemy () {
+      this.controls.enemyHp -= 1
+      // 敌人死亡
+      if (this.controls.enemyHp === 0) {
+        this.isenemyBeing = false
+        // 重生复活
+        this.rebirth('enemy')
+      }
+    },
+    rebirth (role) {
+      const time = this.controls.rebirthTime * 1000
+      this.controls.enemyX = 0
+      this.controls.enemyY = 0
+      setTimeout(() => {
+        const x = Math.round(Math.random()* this.width -20) + 20
+        const y = Math.round(Math.random()* this.height -20) + 20
+        this.controls.enemyX = x
+        this.controls.enemyY = y
+        // 重生
+        this[`is${role}Being`] = true
+        // 回复血量
+        this.controls[`${role}Hp`] = 10
+      }, time)
     },
     attack (type) {
       if (type === 'space') {
@@ -131,7 +173,7 @@ export default {
             let params = {
               type: pd
             }
-            // 炮弹的初始位置
+            // 开炮炮弹的初始位置
             if (pd === 'right') {
               params.left = left + 50
               params.top = top + 20 -5 + 2
@@ -152,10 +194,12 @@ export default {
             const symbol = (item.type === 'down' || item.type === 'right') ? '+' : '-'
             const direction = (item.type === 'left' || item.type === 'right') ? 'left' : 'top'
             // 炮弹 移动
-            item[direction] += +`${symbol}1`
-            // item.left += 1 
+            item[direction] += +`${symbol}${this.controls.bulletDisdance}`
+            // 炮弹是否击中敌人
             const flag = this.bulletLost(item)
-            if (flag) this.controls.foreHp -= 1
+            // 击中敌人时的逻辑
+            if (flag) this.hitEnemy()
+
             this.$set(this.bullets, idx, item)
             if (item.left >= this.width - 40 || item.left < 20 || item.top >= this.height || item.top < 0 || flag) {
               this.$set(this.bullets, idx, null)
@@ -181,7 +225,7 @@ export default {
     },
     keyDown (e) {
       const keyCode = this.keyCodeType[e.keyCode]
-      // 判断边界 width900 height200 padding 20
+      // 判断边界 padding 20
       if (keyCode) {
         this.attack(keyCode)
       }
@@ -266,5 +310,10 @@ export default {
       text-align: center;
     }
   }
+}
+.control-show {
+  position: absolute;
+  right: 10px;
+  top: 5px;
 }
 </style>
