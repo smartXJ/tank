@@ -1,18 +1,24 @@
 <template>
-  <div class="home">
-    <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
-    <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
-    <div>123</div>
-    getName: {{getName}}
+  <div class="max fr jc ac fdc">
+    <a :href="item.path" v-for="item in menus" :key="item.path">{{item.name}}</a>
   </div>
 </template>
 
 <script>
+const menus = [
+  { name: '单人游戏', path: 'solo-game' },
+  { name: '双人游戏', path: 'double-game' }
+]
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 export default {
   name: 'Home',
+  data () {
+    return {
+      menus
+    }
+  },
   created () {
     console.log(this.$electron, 'electron')
   },
