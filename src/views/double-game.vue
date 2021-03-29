@@ -1,11 +1,8 @@
 <template>
   <!-- <div class="max flex" @mouseover="over" @mouseout="out" > -->
   <div class="max flex" >
-    <!-- <div>1</div>
-    <div>2</div>
-    <div>3</div>
-    <div>4</div> -->
-    <div id="rotate">xxxxy</div>
+    未开发
+    <div id="rotate" @click="close">关闭</div>
   </div>
 </template>
 <script>
@@ -18,6 +15,10 @@
       }
     },
     methods: {
+      close () {
+        console.log(window.ipcRenderer, 'ipcRenderer')
+        window.ipcRenderer.send('open-close-dialog', 'hello')
+      },
       over () {
         const obj = document.getElementById('rotate')
         if (!this.timer) {

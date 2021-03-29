@@ -1,6 +1,7 @@
 <template>
   <div class="max fr jc ac fdc">
     <a :href="item.path" v-for="item in menus" :key="item.path">{{item.name}}</a>
+        <div id="rotate" @click="close">关闭123</div>
   </div>
 </template>
 
@@ -20,9 +21,11 @@ export default {
     }
   },
   created () {
-    console.log(this.$electron, 'electron')
   },
   methods: {
+    close () {
+     window.ipcRenderer.send('open-close-dialog', 'hello')
+    },
     getName () {
       return this.$electron.remote.app.getName()
     }

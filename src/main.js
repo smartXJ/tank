@@ -2,13 +2,16 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import antd from 'ant-design-vue'
+import 'ant-design-vue/dist/antd.css'
 import './assets/style/main.less'
-
-// import VueElectron from 'vue-electron'
+const { ipcRenderer, remote } = require('electron')
 
 Vue.config.productionTip = false
-
-// Vue.use(VueElectron)
+Vue.use(antd)
+window.ipcRenderer = ipcRenderer
+window.remote = remote
+console.log(window.ipcRenderer, window.remote, 'mian');
 
 new Vue({
   router,

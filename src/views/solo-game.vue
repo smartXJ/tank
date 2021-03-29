@@ -43,7 +43,7 @@ export default {
       // 障碍物
       barriers: [],
       controls: {
-        userHp: 10,
+        userHp: 2,
         // 值越小 发射频率越快
         bulletsFrequencyVlaue: 40,
         // 值越小 user移动越快
@@ -66,8 +66,9 @@ export default {
         // 复活时间 s
         rebirthTime: 3,
         // 游戏关卡
-        custom: 2,
+        custom: 1,
       },
+      // user位置
       left: 20,
       top: 20,
       // 炮弹
@@ -95,7 +96,10 @@ export default {
     window.addEventListener('keydown', this.keyDown)
     window.addEventListener('keyup', this.keyUp)
     // 若有缓存
-    // ...
+    const data = window.remote.getGlobal('store').get('setting')
+    JSON.keys(data).forEach(item => {
+      this.controls[item] = data[item]
+    })
   },
   computed: {
     width () {
@@ -114,6 +118,11 @@ export default {
     }
   },
   methods: {
+    saveData () {
+      const { custom } = this.controls
+      const values = { custom }
+      window.remote.getGlobal('store').set('setting', values)
+    },
     basicDeploy () {
       const { deploy, barriers } = this.customList.find(item => item.custom === this.controls.custom)
       this.barriers = barriers || []
@@ -165,6 +174,8 @@ export default {
           }
         })
         this.controls.custom += 1
+        // 保存数据
+        this.saveData()
       }
     },
     // input 发生改变
