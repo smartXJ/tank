@@ -1,20 +1,19 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import store from './store'
+// import store from './store'
 import antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
 import './assets/style/main.less'
-const { ipcRenderer, remote } = require('electron')
+// const { ipcRenderer, remote } = require('electron')
 
 Vue.config.productionTip = false
 Vue.use(antd)
-window.ipcRenderer = ipcRenderer
-window.remote = remote
-console.log(window.ipcRenderer, window.remote, 'mian');
+// window.ipcRenderer = ipcRenderer
+// window.remote = remote
 
 new Vue({
   router,
-  store,
+  // store,
   render: h => h(App)
 }).$mount('#app')

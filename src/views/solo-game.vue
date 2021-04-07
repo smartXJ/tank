@@ -6,7 +6,8 @@
         <div :class="'pipeline-' + pipelineDirection"></div>
         <span>user</span>
       </div>
-      <div :class="'pipeline-' + item.type" v-for="(item,idx) in bullets" :key="idx" :style="{'left': `${item.left}px`, 'top': `${item.top}px`}"></div>
+      <div :class="'pipeline-' + item.direction" v-for="(item,idx) in bullets" :key="idx" :style="{'left': `${item.left}px`, 'top': `${item.top}px`}"></div>
+      <!-- user炮弹 -->
       <div class="user ac fc jc" :style="{ left: controls.enemyX + 'px', top: controls.enemyY + 'px',background: 'red' }" v-show="isenemyBeing">
         <span>{{controls.enemyHp}}</span>
       </div>
@@ -44,7 +45,7 @@ export default {
       barriers: [],
       controls: {
         userHp: 2,
-        // 值越小 发射频率越快
+        // 值越小 炮弹发射频率越快
         bulletsFrequencyVlaue: 40,
         // 值越小 user移动越快
         userFrequencyVlaue: 1.5,
@@ -66,7 +67,7 @@ export default {
         // 复活时间 s
         rebirthTime: 3,
         // 游戏关卡
-        custom: 1,
+        custom: 2,
       },
       // user位置
       left: 20,
@@ -96,10 +97,10 @@ export default {
     window.addEventListener('keydown', this.keyDown)
     window.addEventListener('keyup', this.keyUp)
     // 若有缓存
-    const data = window.remote.getGlobal('store').get('setting')
-    JSON.keys(data).forEach(item => {
-      this.controls[item] = data[item]
-    })
+    // const data = window.remote.getGlobal('store').get('setting')
+    // Object.keys(data).forEach(item => {
+    //   this.controls[item] = data[item]
+    // })
   },
   computed: {
     width () {
@@ -128,6 +129,7 @@ export default {
       this.barriers = barriers || []
       // 默认
       this.controls.enemyLifLimit = 1
+      this.controls.userHp = 2
       Object.keys(deploy).forEach(item => {
         this.controls[item] = deploy[item]
       })
@@ -212,7 +214,7 @@ export default {
       this.barriers.forEach(({X, Y, height, width}) => {
         // const maxHeight = height ? height + 50 + Y : height + 5 + Y
         // const maxWidth = width ? width + 40 + X : width + 5 + X
-        const maxHeight = height + 10 + Y + 10
+        const maxHeight = height + 10 + Y
         const maxWidth = width + X + 10
         const driveDirection = this.driveDirection
         if (Y -50 < userY &&  maxHeight > userY && (X === userX-10 && driveDirection.includes('left')|| X=== userX + 50 && driveDirection.includes('right'))) {
@@ -233,13 +235,7 @@ export default {
           this[direction] -= value
           return
         }
-        // 下
-        // if (X -40 < userX &&  maxWidth > userX && Y === userY+50 && driveDirection.includes('down')) {
-        //   this[direction] -= value
-        // }
       })
-      // this[direction] += flag ? value : 0
-
     },
     // 炮弹攻击敌人 item为炮弹
     /**
@@ -294,17 +290,17 @@ export default {
         this.controls[`${role}Hp`] = this.controls[`${role}Ample`] || 10
       }, time)
     },
-    bulletLostByBarrier ({ top: userY, left: userX, type }) {
+    bulletLostByBarrier ({ top: userY, left: userX, direction }) {
       // 是否遇到障碍物
       let flag = false
       this.barriers.forEach(({X, Y, height, width}) => {
         const maxHeight = height  + Y
         const maxWidth = width + X
-        if (Y -5 < userY &&  maxHeight > userY && (X === userX && type === 'left'|| X - 10 === userX && type === 'right')) {
+        if (Y -5 < userY &&  maxHeight > userY && (X === userX && direction === 'left'|| X - 10 === userX && direction === 'right')) {
           flag = true
           return true
         }
-        if (X -5 < userX &&  maxWidth > userX && (Y === userY && type ==='top' || Y - 10 === userY && type === 'down')) {
+        if (X -5 < userX &&  maxWidth > userX && (Y === userY && direction ==='top' || Y - 10 === userY && direction === 'down')) {
           flag = true
           return true
         }
@@ -336,42 +332,45 @@ export default {
             const pd = this.pipelineDirection
             const { left, top } = this
             let params = {
-              type: pd
+              direction: pd,
+              type: 'user'
             }
             // 开炮炮弹的初始位置
-            if (pd === 'right') {
-              params.left = left + 40
-              params.top = top + 20 -5 + 2
-            } else if (pd === 'left') {
-              params.left = left - 10
-              params.top = top + 20 -5 + 2
-            } else if (pd === 'top') {
-              params.top = top - 10
-              params.left = left + 20 -5 + 2
-            } else {
-              params.top = top + 40
-              params.left = left + 20 -5 + 2
+            switch (pd) {
+              case 'right' :
+                params.left = left + 40
+                params.top = top + 20 -5 + 2.5
+                break;
+              case 'left' :
+                params.left = left - 10
+                params.top = top + 20 -5 + 2.5
+                break;
+              case 'top' :
+                params.top = top - 10
+                params.left = left + 20 -5 + 2.5
+                break;
+              case 'down' :
+                params.top = top + 40
+                params.left = left + 20 -5 + 2.5
+                break;
             }
             this.bullets.push(params)
           }
           // 炮弹移动
           this.bullets.forEach((item, idx) => {
-            const symbol = (item.type === 'down' || item.type === 'right') ? '+' : '-'
-            const direction = (item.type === 'left' || item.type === 'right') ? 'left' : 'top'
+            const symbol = (item.direction === 'down' || item.direction === 'right') ? '+' : '-'
+            const direction = (item.direction === 'left' || item.direction === 'right') ? 'left' : 'top'
             // 炮弹 移动
             item[direction] += +`${symbol}${this.controls.bulletDisdance}`
             // 炮弹是否击中敌人
-            const flag = this.bulletLost(item)
+            const flag = this.bulletLost(item => item.type === 'user')
             // 炮弹是否击中障碍物
             let flgByBarrier = false
             if (flag) {
               this.hitTatget('enemy')
             } else {
               flgByBarrier = this.bulletLostByBarrier(item)
-              // console.log(flgByBarrier, 'flgByBarrier');
             }
-
-            // this.$set(this.bullets, idx, item)
             if (item.left >= this.width - 40 || item.left < 20 || item.top >= this.height || item.top < 0 || flag || flgByBarrier) {
               this.$set(this.bullets, idx, null)
             }

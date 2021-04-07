@@ -30,7 +30,11 @@ const customList = [
     },
     // 障碍物
     barriers: [
-      { X: 500, Y: 0, height: 510 }
+      { X: 100, Y: 0, width: 200 },
+      { X: 300, Y: 0, height: 100 },
+      { X: 100, Y: 100, width: 200 },
+      { X: 300, Y: 0, height: 100 },
+      { X: 300, Y: 0, width: 200 }
     ],
   },
 ]
