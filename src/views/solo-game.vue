@@ -363,7 +363,8 @@ export default {
             // 炮弹 移动
             item[direction] += +`${symbol}${this.controls.bulletDisdance}`
             // 炮弹是否击中敌人
-            const flag = this.bulletLost(item => item.type === 'user')
+            const flag = item.type === 'user' ? this.bulletLost(item) : false
+            // this.bulletLost(item => item.type === 'user')
             // 炮弹是否击中障碍物
             let flgByBarrier = false
             if (flag) {
