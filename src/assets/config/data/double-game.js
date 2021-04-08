@@ -1,4 +1,19 @@
-
+const keyCodeType = {
+  // black
+  87: 'top',
+  83: 'down',
+  65: 'left',
+  68: 'right',
+  32: 'space',
+  // red
+  38: 'up',
+  40: 'dowwn',
+  37: 'left',
+  39: 'right',
+  45: 'zero',
+  // start game
+  13: 'enter',
+}
 const soloControlList = [
   { label: 'user血量', value: 'userHp' },
   // { label: '敌人生命数量', value: 'enemyLifLimit' },
@@ -41,5 +56,6 @@ const customList = [
 ]
 export {
   soloControlList,
-  customList
+  customList,
+  keyCodeType
 }

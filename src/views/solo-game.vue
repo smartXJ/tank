@@ -128,13 +128,18 @@ export default {
       const { deploy, barriers } = this.customList.find(item => item.custom === this.controls.custom)
       this.barriers = barriers || []
       // 默认
-      this.controls.enemyLifLimit = 1
-      this.controls.userHp = 2
+      let defalutValue = {
+        enemyLifLimit: 1,
+        enemyHp: 10,
+        userHp: 2,
+        left: 20,
+        top: 20
+      }
+      Object.assign(this.controls, defalutValue)
+      // 改变默认
       Object.keys(deploy).forEach(item => {
         this.controls[item] = deploy[item]
       })
-      // const { enemyLifLimit } = this.controls
-      // this.controls.enemyLifLimit = ell || enemyLifLimit
     },
     startGame () {
       // 关闭控制台
@@ -142,7 +147,7 @@ export default {
       // 显示敌人
       // this.isenemyBeing = true
       if (this.controls.custom === 1) {
-        alert('使用 WASD 进行移动，空格 进行攻击')
+        alert('使用 WASD 进行移动，空格 进行攻击，Enter 开始游戏')
       }
       this.gameStatus = 'runing'
       // 获取基本数据
@@ -317,7 +322,7 @@ export default {
       })
       return flag
     },
-    attack (type) {
+    attackAndMove (type) {
       if (type === 'space') {
         // 开启攻击
         this.isAttack = true
@@ -396,9 +401,11 @@ export default {
     },
     keyDown (e) {
       const keyCode = this.keyCodeType[e.keyCode]
+      // 按下enter 开始游戏
+      if (keyCode === 'enter' && this.gameStatus !== 'runing') this.startGame()
       // 判断边界 padding 20
-      if (keyCode) {
-        this.attack(keyCode)
+      if (keyCode && keyCode !== 'enter') {
+        this.attackAndMove(keyCode)
       }
     },
     keyUp (e) {

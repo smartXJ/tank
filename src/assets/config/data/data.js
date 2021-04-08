@@ -3,7 +3,8 @@ const keyCodeType = {
   83: 'down',
   65: 'left',
   68: 'right',
-  32: 'space'
+  32: 'space',
+  13: 'enter'
 }
 const publicControlList = [
   { label: '炮弹发射频率', value: 'bulletsFrequencyVlaue' },
