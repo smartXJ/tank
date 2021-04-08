@@ -6,8 +6,8 @@
         <div :class="'pipeline-' + pipelineDirection"></div>
         <span>user</span>
       </div>
-      <div :class="'pipeline-' + item.direction" v-for="(item,idx) in bullets" :key="idx" :style="{'left': `${item.left}px`, 'top': `${item.top}px`}"></div>
       <!-- user炮弹 -->
+      <div :class="'pipeline-' + item.direction" v-for="(item,idx) in bullets" :key="idx" :style="{'left': `${item.left}px`, 'top': `${item.top}px`}"></div>
       <div class="user ac fc jc" :style="{ left: controls.enemyX + 'px', top: controls.enemyY + 'px',background: 'red' }" v-show="isenemyBeing">
         <span>{{controls.enemyHp}}</span>
       </div>
@@ -276,8 +276,8 @@ export default {
             this.gameWin()
           }
         } else {
-          this.startGame = 'over'
-          // alert('game over')
+          this.gameStatus = 'over'
+          alert('game over')
         }
       }
     },

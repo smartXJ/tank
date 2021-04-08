@@ -23,6 +23,11 @@ const routes = [
     name: 'Solo',
     component: () => import(/* webpackChunkName: "solo" */ '../views/solo-game.vue')
   }
+  // {
+  //   path: '/demo',
+  //   name: 'Demo',
+  //   component: () => import(/* webpackChunkName: "solo" */ '../views/demo.vue')
+  // },
 ]
 
 const router = new VueRouter({

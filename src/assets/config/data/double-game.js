@@ -15,7 +15,12 @@ const keyCodeType = {
   13: 'enter',
 }
 const soloControlList = [
-  { label: 'user血量', value: 'userHp' },
+  // { label: '敌人生命数量', value: 'enemyLifLimit' },
+  { label: '敌人生命数量', value: 'enemyLifLimit' },
+  { label: '游戏关卡', value: 'custom' },
+]
+const doubleControlList = [
+  { label: 'K : Q', value: 'QHitTime', value2: 'KHitTime' },
   // { label: '敌人生命数量', value: 'enemyLifLimit' },
   { label: '敌人生命数量', value: 'enemyLifLimit' },
   { label: '游戏关卡', value: 'custom' },
@@ -55,6 +60,7 @@ const customList = [
   },
 ]
 export {
+  doubleControlList,
   soloControlList,
   customList,
   keyCodeType

@@ -7,7 +7,8 @@
 <script>
 const menus = [
   { name: '单人游戏', path: '/solo-game' },
-  { name: '双人游戏', path: '/double-game' }
+  { name: '双人游戏', path: '/double-game' },
+  { name: 'demo', path: '/demo' }
 ]
 
 export default {
