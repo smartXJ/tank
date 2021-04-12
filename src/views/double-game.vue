@@ -1,6 +1,7 @@
 <template>
   <div class="content">
     <tank
+    v-if="gameStatus === 'runing'"
     ref="K"
     :name="usersData.K.name"
     :enemyPostion="enemyPostionFromK"
@@ -8,6 +9,7 @@
     @tankMove="tankMove"
     />
     <tank
+    v-if="gameStatus === 'runing'"
     ref="Q"
     :color="usersData.Q.color"
     :position="usersData.Q.position"
@@ -25,7 +27,7 @@
         {{item.label}}
         <div :class="item.value2 && 'fsd jc input-2'">
           <input type="number" :disabled="gameStatus === 'runing'" v-model="controls[item.value]" @change="change(item.value)">
-          <input v-if="item.value2" type="number" v-model="controls[item.value2]" @change="change(item.value2)">
+          <input v-if="item.value2" type="number" :disabled="gameStatus === 'runing'" v-model="controls[item.value2]" @change="change(item.value2)">
         </div>
       </div>
       <button @click="startGame" v-show="gameStatus !=='runing'">{{ gameStatus === 'over' ? '重新开始' : '开始游戏'}}</button>
@@ -37,19 +39,7 @@
 
 <script>
 import tank from '../components/tank'
-import { doubleControlList } from '../assets/config/data/double-game'
-
-const usersData = {
-  K: {
-    name: 'K'
-  },
-  Q: {
-    name: 'Q',
-    position: { userX: 200, userY: 200, pipelineDirection: 'left' },
-    color: 'red',
-    keyCodeType: {  38: 'top', 40: 'bottom', 37: 'left', 39: 'right', 45: 'fire' }
-  }
-}
+import { doubleControlList, usersData, initData } from '../assets/config/data/double-game'
 
 export default {
   components: {
@@ -58,6 +48,8 @@ export default {
   computed: {
   },
   mounted () {
+    // initData
+    this.controls = { ...this.controls, ...this.initData}
   },
   data () {
     return {
@@ -68,32 +60,13 @@ export default {
       gameStatus: 'await',
       doubleControlList,
       disabled: false,
+      initData,
       controls: {
-        QHitTime: 0,
-        KHitTime: 0,
-        userHp: 2,
-        // 值越小 炮弹发射频率越快
-        bulletsFrequencyVlaue: 40,
-        // 值越小 user移动越快
-        userFrequencyVlaue: 1.5,
-        // 敌人血量
-        enemyHp: 9,
-        // 敌人位置
-        enemyX: 0,
-        enemyY: 0,
-        // 敌人生命次数
-        enemyLifLimit: 1,
-        // 敌人满血生命值
-        enemyAmple: 10,
-        // user一次移动的px
-        disdance: 1,
-        // 炮弹一次移动的px
-        bulletDisdance: 1,
         // 控制中心宽度
         controlWidth: 200,
-        // 复活时间 s
-        rebirthTime: 3,
-        // 游戏关卡
+        maxDie: 10,
+        QHitTime: 0,
+        KHitTime: 0,
         custom: 2,
       },
     }
@@ -105,39 +78,41 @@ export default {
     hit (name) {
       console.log(name, '被击中了')
       this.controls[`${name}HitTime`] += 1
+      if (this.controls[`${name}HitTime`] >= this.controls.maxDie) {
+        alert(`获胜者：${name === 'Q' ? 'K' : 'Q'} ！！！`)
+        this.overGame()
+      }
     },
     startGame () {
-      // 控制台 不可编辑
       this.gameStatus = 'runing'
     },
     overGame () {
-      this.disabled = 'over'
+      this.controls = { ...this.controls, ...this.initData}
+      this.gameStatus = 'over'
     },
     tankMove (item) {
       const name = item.name === 'Q' ? 'K' : 'Q'
       this[`enemyPostionForm${name}`] = [item]
     },
     change (type) {
-      this.controls[type] = +this.controls[type]
-      if (this.controls[type] < 1) {
-        this.controls[type] = 1
+      this.controls[type] = ~~this.controls[type]
+      if (this.controls[type] < 0) {
+        this.controls[type] = 0
       }
     },
-  },
-  // watch: {
-  //   '$refs.K' (v, n) {
-  //     console.log('K');
-  //     console.log(v, n)
-  //   }
-  // }
+  }
 }
 </script>
-
-<style>
+<style lang="less" scoped>
 .control {
   position: absolute;
   right: 0px;
   height: 100vh;
   top: 0;
 }
+.input-2 {
+  input {
+        width: 41%;
+      }
+    }
 </style>

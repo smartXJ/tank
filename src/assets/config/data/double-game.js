@@ -1,19 +1,3 @@
-const keyCodeType = {
-  // black
-  87: 'top',
-  83: 'down',
-  65: 'left',
-  68: 'right',
-  32: 'space',
-  // red
-  38: 'up',
-  40: 'dowwn',
-  37: 'left',
-  39: 'right',
-  45: 'zero',
-  // start game
-  13: 'enter',
-}
 const soloControlList = [
   // { label: '敌人生命数量', value: 'enemyLifLimit' },
   { label: '敌人生命数量', value: 'enemyLifLimit' },
@@ -21,9 +5,8 @@ const soloControlList = [
 ]
 const doubleControlList = [
   { label: 'K : Q', value: 'QHitTime', value2: 'KHitTime' },
-  // { label: '敌人生命数量', value: 'enemyLifLimit' },
-  { label: '敌人生命数量', value: 'enemyLifLimit' },
-  { label: '游戏关卡', value: 'custom' },
+  { label: '最大死亡次数', value: 'maxDie' },
+  // { label: '游戏关卡', value: 'custom' },
 ]
 const customList = [
   {
@@ -59,9 +42,26 @@ const customList = [
     ],
   },
 ]
+const usersData = {
+  K: {
+    name: 'K'
+  },
+  Q: {
+    name: 'Q',
+    position: { userX: 200, userY: 200, pipelineDirection: 'left' },
+    color: 'red',
+    keyCodeType: {  38: 'top', 40: 'bottom', 37: 'left', 39: 'right', 45: 'fire' }
+  }
+}
+const initData = {
+  maxDie: 10,
+  QHitTime: 0,
+  KHitTime: 0
+}
 export {
   doubleControlList,
   soloControlList,
   customList,
-  keyCodeType
+  usersData,
+  initData
 }

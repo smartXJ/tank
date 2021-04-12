@@ -10,5 +10,18 @@ module.exports = {
       nodeIntegration: true
       // preload: 'src/preload.js'
     }
+  },
+  css: {
+    loaderOptions: {
+      less: {
+        javascriptEnabled: true,
+        modifyVars: {
+          // less 全局变量
+          // 主色
+          '@primary-color': '#fb7299',
+          '@link-color': '#fb7299'
+        }
+      }
+    }
   }
 }
